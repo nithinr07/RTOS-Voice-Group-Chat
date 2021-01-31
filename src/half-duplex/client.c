@@ -33,7 +33,7 @@ int main(int argc, char const *argv[])
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_port = htons(PORT);
 	// Convert IPv4 and IPv6 addresses from text to binary form
-	if(inet_pton(AF_INET, "52.191.116.193", &serv_addr.sin_addr)<=0)
+	if(inet_pton(AF_INET, "40.121.60.204", &serv_addr.sin_addr)<=0)
 	{
 		printf("\nInvalid address/ Address not supported \n");
 		return -1;

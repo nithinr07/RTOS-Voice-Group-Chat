@@ -6,13 +6,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <signal.h>
-#include <pthread.h>
 
 #define PORT 4141
 
-int sock = 0; int valread;
-char read_buffer[1024] = {0};
-char write_buffer[1024] = {0};
+int sock = 0;
 
 void close_isr(int signum) {
 	if(signum == SIGINT) {
@@ -22,30 +19,12 @@ void close_isr(int signum) {
 	}
 }
 
-void *read_msg() {
-	while(1) {
-		memset(read_buffer, 0, sizeof(read_buffer));
-		valread = read(sock, read_buffer, 1024); 
-		if(valread != 0) {
-			printf("Server : %s\n", read_buffer);
-		}
-	}
-} 
-
-void *write_msg() {
-	while(1) {
-		memset(write_buffer, 0, sizeof(write_buffer));
-		printf("Client : ");
-		scanf("%[^\n]%*c", write_buffer);
-		send(sock, write_buffer, strlen(write_buffer), 0);
-	}
-}
-
 int main(int argc, char const *argv[])
 {
+	int valread;
 	struct sockaddr_in serv_addr;
-	pthread_t r, w;
-
+	char read_buffer[1024] = {0};
+	char write_buffer[1024] = {0};
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
 		printf("\n Socket creation error \n");
@@ -71,11 +50,20 @@ int main(int argc, char const *argv[])
 
 	signal(SIGINT, close_isr);
 
-	pthread_create(&r, NULL, read_msg, NULL);
-	pthread_create(&w, NULL, write_msg, NULL);
-
-	pthread_join(r, NULL);
-	pthread_join(w, NULL);
-
+	if(fork() == 0) {
+		while(1) {
+			memset(write_buffer, 0, sizeof(write_buffer));
+			scanf("%[^\n]%*c", write_buffer);
+			send(sock, write_buffer, strlen(write_buffer), 0);
+		}	
+	} else {
+		while(1) {
+			memset(read_buffer, 0, sizeof(read_buffer));
+			valread = read(sock, read_buffer, 1024); 
+			if(valread != 0) {
+				printf("Server : %s\n", read_buffer);
+			}
+		}
+	}
 	return 0;
 }

@@ -6,10 +6,14 @@
 #include <netinet/in.h> 
 #include <string.h> 
 #include <signal.h>
+#include <pthread.h>
 
 #define PORT 4141
 
 int server_fd;
+char read_buffer[1024] = {0}; 
+char write_buffer[1024] ={0};
+int valread, new_socket; 
 
 void close_isr(int signum) {
 	if(signum == SIGINT) {
@@ -19,16 +23,32 @@ void close_isr(int signum) {
 	}
 }
 
+void *read_msg() {
+	while(1) {
+		memset(read_buffer, 0, sizeof(read_buffer));
+		valread = read(new_socket, read_buffer, 1024); 
+		if(valread != 0) {
+			printf("Client : %s\n", read_buffer);
+		}
+	}
+} 
+
+void *write_msg() {
+	while(1) {
+		memset(write_buffer, 0, sizeof(write_buffer));
+		scanf("%[^\n]%*c", write_buffer);
+		send(new_socket, write_buffer, strlen(write_buffer), 0);
+	}
+}
+
 int main(int argc, char const *argv[]) 
 { 
-	int valread, new_socket; 
 	struct sockaddr_in address; 
 	int opt = 1; 
 	int addrlen = sizeof(address); 
-	char read_buffer[1024] = {0}; 
-	char write_buffer[1024] ={0};
-	// char *hello = "Hello from server"; 
-	
+
+	pthread_t r, w;
+
 	// Creating socket file descriptor 
 	if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) 
 	{ 
@@ -68,22 +88,12 @@ int main(int argc, char const *argv[])
 
 	signal(SIGINT, close_isr);
 
-	if(fork() == 0) {
-		while(1) {
-			memset(read_buffer, 0, sizeof(read_buffer));
-			valread = read(new_socket, read_buffer, 1024); 
-			if(valread != 0) {
-				printf("Client : %s\n", read_buffer);
-			}
-		}
-	} else {
-		while(1) {
-			memset(write_buffer, 0, sizeof(write_buffer));
-			printf("Server : ");
-			scanf("%[^\n]%*c", write_buffer);
-			send(new_socket, write_buffer, strlen(write_buffer), 0);
-		}
-	}
+	pthread_create(&r, NULL, read_msg, NULL);
+	pthread_create(&w, NULL, write_msg, NULL);
+
+	pthread_join(r, NULL);
+	pthread_join(w, NULL);
+
 	return 0; 
 } 
 
