@@ -79,13 +79,11 @@ int main(int argc, char const *argv[])
 	} else {
 		while(1) {
 			memset(write_buffer, 0, sizeof(write_buffer));
+			printf("Server : ");
 			scanf("%[^\n]%*c", write_buffer);
 			send(new_socket, write_buffer, strlen(write_buffer), 0);
 		}
 	}
-		
-	// send(new_socket , hello , strlen(hello) , 0 ); 
-	// printf("Hello message sent\n"); 
 	return 0; 
 } 
 

@@ -53,6 +53,7 @@ int main(int argc, char const *argv[])
 	if(fork() == 0) {
 		while(1) {
 			memset(write_buffer, 0, sizeof(write_buffer));
+			printf("Client : ");
 			scanf("%[^\n]%*c", write_buffer);
 			send(sock, write_buffer, strlen(write_buffer), 0);
 		}	
