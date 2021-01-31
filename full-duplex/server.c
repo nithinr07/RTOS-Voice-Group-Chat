@@ -67,10 +67,10 @@ int main(int argc, char const *argv[])
 			while(1) {
 				memset(write_buffer, 0, sizeof(write_buffer));
 				scanf("%[^\n]%*c", write_buffer);
-				send(new_socket, write_buffer, strlen(write_buffer), 0);
 				if(strcmp(write_buffer, "bye") == 0) {
 					exit(0);
 				}
+				send(new_socket, write_buffer, strlen(write_buffer), 0);
 			}
 		}
 		

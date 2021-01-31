@@ -33,15 +33,17 @@ int main(int argc, char const *argv[])
 	{
 		printf("\nConnection Failed \n");
 		return -1;
+	} else {
+		printf("Connection Established \n");
 	}
 	if(fork() == 0) {
 		while(1) {
 			memset(write_buffer, 0, sizeof(write_buffer));
 			scanf("%[^\n]%*c", write_buffer);
-			send(sock, write_buffer, strlen(write_buffer), 0);
 			if(strcmp(write_buffer, "bye") == 0) {
 				exit(0);
 			}
+			send(sock, write_buffer, strlen(write_buffer), 0);
 		}	
 	} else {
 		while(1) {
