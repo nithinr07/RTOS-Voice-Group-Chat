@@ -15,6 +15,7 @@ void close_isr(int signum) {
 	if(signum == SIGINT) {
 		printf("Closing socket\n");
 		close(sock);
+		kill(getpid(), 9)
 	}
 }
 
