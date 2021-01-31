@@ -5,12 +5,22 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#include <signal.h>
 
 #define PORT 4141
 
+int sock = 0;
+
+void close_isr(int signum) {
+	if(signum == SIGINT) {
+		printf("Closing socket\n");
+		close(sock);
+	}
+}
+
 int main(int argc, char const *argv[])
 {
-	int sock = 0, valread;
+	int valread;
 	struct sockaddr_in serv_addr;
 	char read_buffer[1024] = {0};
 	char write_buffer[1024] = {0};
@@ -36,6 +46,9 @@ int main(int argc, char const *argv[])
 	} else {
 		printf("Connection Established \n");
 	}
+
+	signal(SIGINT, close_isr);
+
 	if(fork() == 0) {
 		while(1) {
 			memset(write_buffer, 0, sizeof(write_buffer));

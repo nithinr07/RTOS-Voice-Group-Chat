@@ -5,12 +5,22 @@
 #include <stdlib.h> 
 #include <netinet/in.h> 
 #include <string.h> 
+#include <signal.h>
 
 #define PORT 4141
 
+int server_fd, new_socket;
+
+void close_isr(int signum) {
+	if(signum == SIGINT) {
+		printf("Closing socket\n");
+		close(server_fd);
+	}
+}
+
 int main(int argc, char const *argv[]) 
 { 
-	int server_fd, new_socket, valread; 
+	int valread; 
 	struct sockaddr_in address; 
 	int opt = 1; 
 	int addrlen = sizeof(address); 
@@ -54,22 +64,19 @@ int main(int argc, char const *argv[])
 		perror("accept"); 
 		exit(EXIT_FAILURE); 
 	} 
+
+	signal(SIGINT, close_isr);
+
 	if(fork() == 0) {
 		while(1) {
 			memset(read_buffer, 0, sizeof(read_buffer));
 			valread = read(new_socket, read_buffer, 1024); 
 			printf("Client : %s\n", read_buffer);
-			if(strcmp(read_buffer, "bye") == 0) {
-				exit(0);
-			}
 		}
 		} else {
 			while(1) {
 				memset(write_buffer, 0, sizeof(write_buffer));
 				scanf("%[^\n]%*c", write_buffer);
-				if(strcmp(write_buffer, "bye") == 0) {
-					exit(0);
-				}
 				send(new_socket, write_buffer, strlen(write_buffer), 0);
 			}
 		}
