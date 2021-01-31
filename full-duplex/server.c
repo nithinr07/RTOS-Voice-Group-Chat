@@ -9,7 +9,7 @@
 
 #define PORT 4141
 
-int server_fd, new_socket;
+int server_fd;
 
 void close_isr(int signum) {
 	if(signum == SIGINT) {
@@ -21,7 +21,7 @@ void close_isr(int signum) {
 
 int main(int argc, char const *argv[]) 
 { 
-	int valread; 
+	int valread, new_socket; 
 	struct sockaddr_in address; 
 	int opt = 1; 
 	int addrlen = sizeof(address); 

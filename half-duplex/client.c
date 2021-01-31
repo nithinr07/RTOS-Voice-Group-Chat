@@ -5,8 +5,19 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#include <signal.h>
 
 #define PORT 4141
+
+int sock = 0;
+
+void close_isr(int signum) {
+	if(signum == SIGINT) {
+		printf("Closing socket\n");
+		close(sock);
+		exit(0);
+	}
+}
 
 int main(int argc, char const *argv[])
 {
@@ -33,6 +44,9 @@ int main(int argc, char const *argv[])
 		printf("\nConnection Failed \n");
 		return -1;
 	}
+
+	signal(SIGINT, close_isr);
+
 	while(1) {
 		memset(buffer, 0, sizeof(buffer));
 		scanf("%[^\n]%*c", buffer);
