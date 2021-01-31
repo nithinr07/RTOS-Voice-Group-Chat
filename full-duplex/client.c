@@ -15,7 +15,7 @@ void close_isr(int signum) {
 	if(signum == SIGINT) {
 		printf("Closing socket\n");
 		close(sock);
-		kill(getpid(), 9)
+		exit(0);
 	}
 }
 
@@ -54,18 +54,14 @@ int main(int argc, char const *argv[])
 		while(1) {
 			memset(write_buffer, 0, sizeof(write_buffer));
 			scanf("%[^\n]%*c", write_buffer);
-			if(strcmp(write_buffer, "bye") == 0) {
-				exit(0);
-			}
 			send(sock, write_buffer, strlen(write_buffer), 0);
 		}	
 	} else {
 		while(1) {
 			memset(read_buffer, 0, sizeof(read_buffer));
 			valread = read(sock, read_buffer, 1024); 
-			printf("Server : %s\n", read_buffer);
-			if(strcmp(read_buffer, "bye") == 0) {
-				exit(0);
+			if(valread != 0) {
+				printf("Server : %s\n", read_buffer);
 			}
 		}
 	}
