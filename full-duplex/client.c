@@ -47,7 +47,7 @@ int main(int argc, char const *argv[])
 		while(1) {
 			memset(read_buffer, 0, sizeof(read_buffer));
 			valread = read(sock, read_buffer, 1024); 
-			printf("%s\n", read_buffer);
+			printf("Server : %s\n", read_buffer);
 			if(strcmp(read_buffer, "bye") == 0) {
 				exit(0);
 			}
