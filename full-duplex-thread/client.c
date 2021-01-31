@@ -27,7 +27,7 @@ void *read_msg() {
 		memset(read_buffer, 0, sizeof(read_buffer));
 		valread = read(sock, read_buffer, 1024); 
 		if(valread != 0) {
-			printf("Client : %s\n", read_buffer);
+			printf("Server : %s\n", read_buffer);
 		}
 	}
 } 
@@ -35,7 +35,7 @@ void *read_msg() {
 void *write_msg() {
 	while(1) {
 		memset(write_buffer, 0, sizeof(write_buffer));
-		printf("Server : ");
+		printf("Client : ");
 		scanf("%[^\n]%*c", write_buffer);
 		send(sock, write_buffer, strlen(write_buffer), 0);
 	}
