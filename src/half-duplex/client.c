@@ -23,7 +23,8 @@ int main(int argc, char const *argv[])
 {
 	int sock = 0, valread;
 	struct sockaddr_in serv_addr;
-	char buffer[1024] = {0};
+	char readbuffer[1024] = {0};
+	char writebuffer[1024] = {0};
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
 		printf("\n Socket creation error \n");
@@ -48,12 +49,12 @@ int main(int argc, char const *argv[])
 	signal(SIGINT, close_isr);
 
 	while(1) {
-		memset(buffer, 0, sizeof(buffer));
-		scanf("%[^\n]%*c", buffer);
-		if(strcmp(buffer, "bye") == 0) {
-			exit(0);
-		}
-		send(sock, buffer, strlen(buffer), 0);
+		memset(writebuffer, 0, sizeof(writebuffer));
+		scanf("%[^\n]%*c", writebuffer);
+		send(sock, writebuffer, strlen(writebuffer), 0);
+		memset(readbuffer, 0, sizeof(readbuffer));
+		valread = read(sock, readbuffer, 1024); 
+		printf("%s\n", readbuffer);
 	}
 	return 0;
 }

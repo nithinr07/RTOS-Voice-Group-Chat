@@ -25,8 +25,8 @@ int main(int argc, char const *argv[])
 	struct sockaddr_in address; 
 	int opt = 1; 
 	int addrlen = sizeof(address); 
-	char buffer[1024] = {0}; 
-	// char *hello = "Hello from server"; 
+	char readbuffer[1024] = {0}; 
+	char writebuffer[1024] = {0}; 
 	
 	// Creating socket file descriptor 
 	if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) 
@@ -68,15 +68,12 @@ int main(int argc, char const *argv[])
 	signal(SIGINT, close_isr);
 
 	while(1) {
-		memset(buffer, 0, sizeof(buffer));
-		valread = read(new_socket, buffer, 1024); 
-		if(strcmp(buffer, "bye") == 0) {
-			exit(0);
-		}
-		printf("%s\n", buffer);
+		memset(readbuffer, 0, sizeof(readbuffer));
+		valread = read(new_socket, readbuffer, 1024); 
+		printf("%s\n", readbuffer);
+		memset(writebuffer, 0, sizeof(writebuffer));
+		scanf("%[^\n]%*c", writebuffer);
+		send(new_socket, writebuffer, strlen(writebuffer), 0);
 	} 
-	// send(new_socket , hello , strlen(hello) , 0 ); 
-	// printf("Hello message sent\n"); 
 	return 0; 
 } 
-
