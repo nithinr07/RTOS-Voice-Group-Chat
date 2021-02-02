@@ -50,11 +50,13 @@ int main(int argc, char const *argv[])
 
 	while(1) {
 		memset(writebuffer, 0, sizeof(writebuffer));
+		printf("Enter Message to server : ");
 		scanf("%[^\n]%*c", writebuffer);
+		printf("\n");
 		send(sock, writebuffer, strlen(writebuffer), 0);
 		memset(readbuffer, 0, sizeof(readbuffer));
 		valread = read(sock, readbuffer, 1024); 
-		printf("%s\n", readbuffer);
+		printf("Response from Server : %s\n", readbuffer);
 	}
 	return 0;
 }

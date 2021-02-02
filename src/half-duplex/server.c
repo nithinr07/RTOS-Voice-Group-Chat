@@ -70,8 +70,9 @@ int main(int argc, char const *argv[])
 	while(1) {
 		memset(readbuffer, 0, sizeof(readbuffer));
 		valread = read(new_socket, readbuffer, 1024); 
-		printf("%s\n", readbuffer);
+		printf("Message from client : %s\n", readbuffer);
 		memset(writebuffer, 0, sizeof(writebuffer));
+		printf("Enter Message to client : ");
 		scanf("%[^\n]%*c", writebuffer);
 		send(new_socket, writebuffer, strlen(writebuffer), 0);
 	} 
