@@ -75,6 +75,7 @@ int main(int argc, char const *argv[])
 		printf("Enter Message to client : ");
 		scanf("%[^\n]%*c", writebuffer);
 		send(new_socket, writebuffer, strlen(writebuffer), 0);
+		printf("\n");
 	} 
 	return 0; 
 } 

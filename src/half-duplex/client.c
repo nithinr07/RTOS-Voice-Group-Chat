@@ -52,11 +52,11 @@ int main(int argc, char const *argv[])
 		memset(writebuffer, 0, sizeof(writebuffer));
 		printf("Enter Message to server : ");
 		scanf("%[^\n]%*c", writebuffer);
-		printf("\n");
 		send(sock, writebuffer, strlen(writebuffer), 0);
 		memset(readbuffer, 0, sizeof(readbuffer));
 		valread = read(sock, readbuffer, 1024); 
 		printf("Response from Server : %s\n", readbuffer);
+		printf("\n");
 	}
 	return 0;
 }
