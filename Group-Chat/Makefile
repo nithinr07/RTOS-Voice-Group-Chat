@@ -1,6 +1,7 @@
-BUILD_DIR = ./build
-BIN_DIR   = ./bin
-SRC_DIR   = ./src
+BUILD_DIR   = ./build
+BIN_DIR     = ./bin
+INCLUDE_DIR = ./include
+SRC_DIR     = ./src
 
 CC 		  = gcc
 LD        = gcc
@@ -19,16 +20,16 @@ server: $(BIN_DIR)/$(SERVER)
 						./$(BIN_DIR)/$(SERVER)
 
 $(BIN_DIR)/$(CLIENT): $(BUILD_DIR)/client.o
-						$(LD) $(CFLAG) $(BUILD_DIR)/client.o -o $(BIN_DIR)/$(CLIENT)
+						$(LD) $(CFLAG) $(BUILD_DIR)/client.o -o $(BIN_DIR)/$(CLIENT) -I $(INCLUDE_DIR)
 
 $(BIN_DIR)/$(SERVER): $(BUILD_DIR)/server.o
-						$(LD) $(CFLAG) $(BUILD_DIR)/server.o -o $(BIN_DIR)/$(SERVER)
+						$(LD) $(CFLAG) $(BUILD_DIR)/server.o -o $(BIN_DIR)/$(SERVER) -I $(INCLUDE_DIR)
 
 $(BUILD_DIR)/client.o: $(SRC_DIR)/client.c 
-						$(CC) -c $(SRC_DIR)/client.c -o $(BUILD_DIR)/client.o
+						$(CC) -c $(SRC_DIR)/client.c -o $(BUILD_DIR)/client.o -I $(INCLUDE_DIR)
 
 $(BUILD_DIR)/server.o: $(SRC_DIR)/server.c 
-						$(CC) -c $(SRC_DIR)/server.c -o $(BUILD_DIR)/server.o
+						$(CC) -c $(SRC_DIR)/server.c -o $(BUILD_DIR)/server.o -I $(INCLUDE_DIR)
 
 build: $(BIN_DIR)/$(PROG_NAME)
 
