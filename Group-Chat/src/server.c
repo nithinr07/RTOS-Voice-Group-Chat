@@ -37,8 +37,6 @@ void close_isr(int signum) {
 
 void *connection_handler(void* clientfd) {
 	int client_fd = *((int *) clientfd);
-	char buffer[1024] = {0};
-	char msg[1024] = {0};
 	int valread;
 	while(1) {
 		struct Message message;

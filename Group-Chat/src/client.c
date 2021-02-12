@@ -32,9 +32,9 @@ void close_isr(int signum) {
 void *read_msg() {
 	while(1) {
 		struct Message message;
-		// memset(read_buffer, 0, sizeof(read_buffer));
 		valread = read(sock, &message, sizeof(message)); 
 		if(valread != 0) {
+			fflush(stdout);
 			printf("%s : %s\n", message.name, message.msg);
 		}
 	}
@@ -45,7 +45,6 @@ void *write_msg() {
 		struct Message message;
 		strcpy(message.name, name);
 		memset(write_buffer, 0, sizeof(write_buffer));
-		printf("You : ");
 		scanf("%[^\n]%*c", write_buffer);
 		strcpy(message.msg, write_buffer);
 		send(sock, &message, sizeof(message), 0);
