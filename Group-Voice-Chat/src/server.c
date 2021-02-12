@@ -8,6 +8,8 @@
 #include <signal.h>
 #include <pthread.h>
 
+#include "message.h"
+
 #define PORT 4141
 #define MAX 1000
 
@@ -15,43 +17,33 @@ int server_fd;
 int client_connections[MAX];
 int client_num;
 
+pthread_t clients[MAX];
 pthread_mutex_t client_num_mutex;
 
 void close_isr(int signum) {
 	if(signum == SIGINT) {
-		printf("Closing socket\n");
+		printf("Closing server\n");
+		for (int i = 0; i < client_num; i++) {
+            pthread_kill(clients[i], SIGKILL);
+        }
+		for(int i = 0; i < client_num; i++) {
+			close(client_connections[i]);
+		}
 		close(server_fd);
+		pthread_exit(NULL);
 		exit(0);
 	}
 }
 
-int get_client_id(int clientfd) {
-	int id = 0;
-	for(int i = 0; i < client_num; i++) {
-		if(clientfd == client_connections[i]) {
-			id = i;
-			break;
-		}
-	}
-	return(id);
-}
-
 void *connection_handler(void* clientfd) {
 	int client_fd = *((int *) clientfd);
-	char buffer[1024] = {0};
-	char msg[1024] = {0};
 	int valread;
-	int id = get_client_id(client_fd);
 	while(1) {
-		memset(buffer, 0, sizeof(buffer));
-		memset(msg, 0, sizeof(msg));
-		valread = read(client_fd, buffer, 1024); 
-		sprintf(msg, "%d", id);
-		strcat(msg," : ");
-		strcat(msg, buffer);
+		struct Message message;
+		valread = read(client_fd, &message, sizeof(message)); 
 		for(int i = 0; i < client_num; i++) {
 			if(client_fd != client_connections[i]) {
-				send(client_connections[i], msg, strlen(msg), 0);
+				send(client_connections[i], &message, sizeof(message), 0);
 			}
 		}
 	}
@@ -63,8 +55,6 @@ int main(int argc, char const *argv[])
 	struct sockaddr_in address; 
 	int opt = 1; 
 	int addrlen = sizeof(address); 
-
-	pthread_t clients[MAX];
 
 	signal(SIGINT, close_isr);
 	// Creating socket file descriptor 
@@ -113,8 +103,5 @@ int main(int argc, char const *argv[])
 
 		pthread_mutex_unlock(&client_num_mutex);
 	}
-
-	pthread_exit(NULL);
 	return 0; 
-} 
-
+}
