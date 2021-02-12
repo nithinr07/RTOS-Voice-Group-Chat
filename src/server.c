@@ -9,11 +9,13 @@
 #include <pthread.h>
 
 #define PORT 4141
+#define MAX 1000
 
 int server_fd;
-char read_buffer[1024] = {0}; 
-char write_buffer[1024] ={0};
-int valread, new_socket; 
+int client_connections[MAX];
+int client_num;
+
+pthread_mutex_t client_num_mutex;
 
 void close_isr(int signum) {
 	if(signum == SIGINT) {
@@ -23,32 +25,48 @@ void close_isr(int signum) {
 	}
 }
 
-void *read_msg() {
-	while(1) {
-		memset(read_buffer, 0, sizeof(read_buffer));
-		valread = read(new_socket, read_buffer, 1024); 
-		if(valread != 0) {
-			printf("Client : %s\n", read_buffer);
+int get_client_id(int clientfd) {
+	int id = 0;
+	for(int i = 0; i < client_num; i++) {
+		if(clientfd == client_connections[i]) {
+			id = i;
+			break;
 		}
 	}
-} 
+	return(id);
+}
 
-void *write_msg() {
+void *connection_handler(void* clientfd) {
+	int client_fd = *((int *) clientfd);
+	char buffer[1024] = {0};
+	char msg[1024] = {0};
+	int valread;
+	int id = get_client_id(client_fd);
 	while(1) {
-		memset(write_buffer, 0, sizeof(write_buffer));
-		scanf("%[^\n]%*c", write_buffer);
-		send(new_socket, write_buffer, strlen(write_buffer), 0);
+		memset(buffer, 0, sizeof(buffer));
+		memset(msg, 0, sizeof(msg));
+		valread = read(client_fd, buffer, 1024); 
+		sprintf(msg, "%d", id);
+		strcat(msg," says: ");
+		strcat(msg, buffer);
+		for(int i = 0; i < client_num; i++) {
+			if(client_fd != client_connections[i]) {
+				send(client_connections[i], msg, strlen(msg), 0);
+			}
+		}
 	}
 }
 
 int main(int argc, char const *argv[]) 
 { 
+	int valread, new_socket; 
 	struct sockaddr_in address; 
 	int opt = 1; 
 	int addrlen = sizeof(address); 
 
-	pthread_t r, w;
+	pthread_t clients[MAX];
 
+	signal(SIGINT, close_isr);
 	// Creating socket file descriptor 
 	if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) 
 	{ 
@@ -56,7 +74,7 @@ int main(int argc, char const *argv[])
 		exit(EXIT_FAILURE); 
 	} 
 	
-	// Forcefully attaching socket to the port 8080 
+	// Forcefully attaching socket to the port 4141 
 	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, 
 											&opt, sizeof(opt))) 
 	{ 
@@ -67,33 +85,36 @@ int main(int argc, char const *argv[])
 	address.sin_addr.s_addr = INADDR_ANY; 
 	address.sin_port = htons( PORT ); 
 	
-	// Forcefully attaching socket to the port 8080 
+	// Forcefully attaching socket to the port 4141 
 	if (bind(server_fd, (struct sockaddr *)&address, 
 								sizeof(address))<0) 
 	{ 
 		perror("bind failed"); 
 		exit(EXIT_FAILURE); 
 	} 
-	if (listen(server_fd, 3) < 0) 
+	if (listen(server_fd, 5) < 0) 
 	{ 
 		perror("listen"); 
 		exit(EXIT_FAILURE); 
 	} 
-	if ((new_socket = accept(server_fd, (struct sockaddr *)&address, 
-					(socklen_t*)&addrlen))<0) 
-	{ 
-		perror("accept"); 
-		exit(EXIT_FAILURE); 
-	} 
+	while(1) {
+		if ((new_socket = accept(server_fd, (struct sockaddr *)&address, 
+						(socklen_t*)&addrlen))<0) 
+		{ 
+			perror("accept"); 
+			exit(EXIT_FAILURE); 
+		} 
 
-	signal(SIGINT, close_isr);
+		pthread_mutex_lock(&client_num_mutex);
+		
+		client_connections[client_num] = new_socket;
+		pthread_create(&clients[client_num], NULL, connection_handler, (void *) &new_socket);
+		client_num++; 
 
-	pthread_create(&r, NULL, read_msg, NULL);
-	pthread_create(&w, NULL, write_msg, NULL);
+		pthread_mutex_unlock(&client_num_mutex);
+	}
 
-	pthread_join(r, NULL);
-	pthread_join(w, NULL);
-
+	pthread_exit(NULL);
 	return 0; 
 } 
 
