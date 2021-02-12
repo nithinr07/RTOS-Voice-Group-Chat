@@ -27,7 +27,7 @@ void *read_msg() {
 		memset(read_buffer, 0, sizeof(read_buffer));
 		valread = read(sock, read_buffer, 1024); 
 		if(valread != 0) {
-			printf("Server : %s\n", read_buffer);
+			printf("%s\n", read_buffer);
 		}
 	}
 } 

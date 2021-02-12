@@ -47,7 +47,7 @@ void *connection_handler(void* clientfd) {
 		memset(msg, 0, sizeof(msg));
 		valread = read(client_fd, buffer, 1024); 
 		sprintf(msg, "%d", id);
-		strcat(msg," says: ");
+		strcat(msg," : ");
 		strcat(msg, buffer);
 		for(int i = 0; i < client_num; i++) {
 			if(client_fd != client_connections[i]) {
