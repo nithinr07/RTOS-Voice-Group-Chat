@@ -1,5 +1,12 @@
-/bin/*
-/build/*
+.vscode 
+Group-Chat/bin/*
+Group-Chat/build/*
 
-!/bin/.keep
-!/build/.keep
+Group-Voice-Chat/bin/*
+Group-Voice-Chat/build/*
+
+!/Group-Chat/bin/.keep
+!/Group-Chat/build/.keep
+
+!/Group-Voice-Chat/bin/.keep
+!/Group-Voice-Chat/build/.keep

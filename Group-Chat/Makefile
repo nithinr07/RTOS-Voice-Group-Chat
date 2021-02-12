@@ -34,4 +34,4 @@ $(BUILD_DIR)/server.o: $(SRC_DIR)/server.c
 build: $(BIN_DIR)/$(PROG_NAME)
 
 clean: 
-		rm -f $(BIN_DIR)/$(SERVER) $(BUILD_DIR)/*.o
+		rm -f $(BIN_DIR)/* $(BUILD_DIR)/*.o
