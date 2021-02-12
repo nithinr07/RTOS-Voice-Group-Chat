@@ -8,15 +8,22 @@
 #include <signal.h>
 #include <pthread.h>
 
+#include "message.h"
+
 #define PORT 4141
 
 int sock = 0; int valread;
 char read_buffer[1024] = {0};
 char write_buffer[1024] = {0};
+char name[100];
+
+pthread_t r, w;
 
 void close_isr(int signum) {
 	if(signum == SIGINT) {
 		printf("Closing socket\n");
+		pthread_kill(r, SIGKILL);
+		pthread_kill(w, SIGKILL);
 		close(sock);
 		exit(0);
 	}
@@ -24,27 +31,33 @@ void close_isr(int signum) {
 
 void *read_msg() {
 	while(1) {
-		memset(read_buffer, 0, sizeof(read_buffer));
-		valread = read(sock, read_buffer, 1024); 
+		struct Message message;
+		// memset(read_buffer, 0, sizeof(read_buffer));
+		valread = read(sock, &message, sizeof(message)); 
 		if(valread != 0) {
-			printf("%s\n", read_buffer);
+			printf("%s : %s\n", message.name, message.msg);
 		}
 	}
 } 
 
 void *write_msg() {
 	while(1) {
+		struct Message message;
+		strcpy(message.name, name);
 		memset(write_buffer, 0, sizeof(write_buffer));
+		printf("You : ");
 		scanf("%[^\n]%*c", write_buffer);
-		send(sock, write_buffer, strlen(write_buffer), 0);
+		strcpy(message.msg, write_buffer);
+		send(sock, &message, sizeof(message), 0);
 	}
 }
 
 int main(int argc, char const *argv[])
 {
+	printf("Enter name : ");
+	scanf("%[^\n]%*c", name);
 	struct sockaddr_in serv_addr;
-	pthread_t r, w;
-
+	
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
 		printf("\n Socket creation error \n");
