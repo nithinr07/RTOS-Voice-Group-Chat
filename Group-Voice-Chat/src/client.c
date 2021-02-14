@@ -9,11 +9,12 @@
 #include <pthread.h>
 
 #include "message.h"
+#include "util.h"
 
 #define PORT 4141
+#define BUFSIZE 1024
 
 int sock = 0; int valread;
-char read_buffer[1024] = {0};
 char write_buffer[1024] = {0};
 char name[100];
 
@@ -30,31 +31,78 @@ void close_isr(int signum) {
 }
 
 void *read_msg() {
-	while(1) {
+	pa_simple *s = NULL;
+    int ret = 1;
+    int error;
+	for (;;) {
+        uint8_t buf[BUFSIZE];
 		struct Message message;
-		valread = read(sock, &message, sizeof(message)); 
-		if(valread != 0) {
-			fflush(stdout);
-			printf("%s : %s\n", message.name, message.msg);
-		}
-	}
+        ssize_t r;
+        /* Read some data ... */
+        if ((r = loop_read(sock, buf, sizeof(buf))) <= 0) {
+            if (r == 0) /* EOF */
+                break;
+
+            fprintf(stderr, __FILE__": read() failed: %s\n", strerror(errno));
+            goto finish;
+        }
+		// memcpy(buf, message.msg, sizeof(buf));
+		// printf("%s says : \n", message.name);
+        /* ... and play it */
+        if (pa_simple_write(s, buf, (size_t) r, &error) < 0) {
+            fprintf(stderr, __FILE__": pa_simple_write() failed: %s\n", pa_strerror(error));
+            goto finish;
+        }
+    }
+    /* Make sure that every single sample was played */
+    if (pa_simple_drain(s, &error) < 0) {
+        fprintf(stderr, __FILE__": pa_simple_drain() failed: %s\n", pa_strerror(error));
+        goto finish;
+    }
+    ret = 0;
+finish:
+    if (s)
+        pa_simple_free(s);
+
+    return NULL;
 } 
 
 void *write_msg() {
-	while(1) {
+	pa_simple *s = NULL;
+    int ret = 1;
+    int error;
+    /* Create the recording stream */
+    if (!(s = pa_simple_new(NULL, name, PA_STREAM_RECORD, NULL, "record", &ss, NULL, NULL, &error))) {
+        fprintf(stderr, __FILE__": pa_simple_new() failed: %s\n", pa_strerror(error));
+        goto finish;
+    }
+    for (;;) {
 		struct Message message;
-		strcpy(message.name, name);
-		memset(write_buffer, 0, sizeof(write_buffer));
-		scanf("%[^\n]%*c", write_buffer);
-		strcpy(message.msg, write_buffer);
-		send(sock, &message, sizeof(message), 0);
-	}
+        uint8_t buf[BUFSIZE];
+        /* Record some data ... */
+        if (pa_simple_read(s, buf, sizeof(buf), &error) < 0) {
+            fprintf(stderr, __FILE__": pa_simple_read() failed: %s\n", pa_strerror(error));
+            goto finish;
+        }
+		// memcpy(message.msg, buf, sizeof(buf));
+		// strcpy(message.name, name);
+        /* And write it to STDOUT */
+        if (loop_write(sock, buf, sizeof(buf)) != sizeof(buf)) {
+            fprintf(stderr, __FILE__": write() failed: %s\n", strerror(errno));
+            goto finish;
+        }
+    }
+    ret = 0;
+finish:
+    if (s)
+        pa_simple_free(s);
 }
 
 int main(int argc, char const *argv[])
 {
-	printf("Enter name : ");
-	scanf("%[^\n]%*c", name);
+	// printf("Enter name : ");
+	// scanf("%[^\n]%*c", name);
+	strcpy(name, argv[1]);
 	struct sockaddr_in serv_addr;
 	
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)

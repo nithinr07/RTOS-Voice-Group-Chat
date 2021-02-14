@@ -13,7 +13,6 @@
 #define PORT 4141
 
 int sock = 0; int valread;
-char read_buffer[1024] = {0};
 char write_buffer[1024] = {0};
 char name[100];
 
@@ -34,7 +33,6 @@ void *read_msg() {
 		struct Message message;
 		valread = read(sock, &message, sizeof(message)); 
 		if(valread != 0) {
-			fflush(stdout);
 			printf("%s : %s\n", message.name, message.msg);
 		}
 	}
