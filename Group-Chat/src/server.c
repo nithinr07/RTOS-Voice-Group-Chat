@@ -19,6 +19,7 @@ int client_num;
 
 pthread_t clients[MAX];
 pthread_mutex_t client_num_mutex;
+pthread_mutex_t client_exit_mutex;
 
 void close_isr(int signum) {
 	if(signum == SIGINT) {
@@ -38,15 +39,28 @@ void close_isr(int signum) {
 void *connection_handler(void* clientfd) {
 	int client_fd = *((int *) clientfd);
 	int valread;
-	while(1) {
-		struct Message message;
-		valread = read(client_fd, &message, sizeof(message)); 
+	struct Message message;
+	while(read(client_fd, &message, sizeof(message))) {
 		for(int i = 0; i < client_num; i++) {
 			if(client_fd != client_connections[i]) {
 				send(client_connections[i], &message, sizeof(message), 0);
 			}
 		}
 	}
+	pthread_mutex_lock(&client_exit_mutex);
+	
+	int pos;
+	for(int i = 0; i < client_num; i++) {
+		if(client_fd == client_connections[i]) {
+			pos = i;
+		}
+	}
+	for(int i = pos; i < client_num; i++) {
+		client_connections[i] = client_connections[i+1];
+	}
+	client_num--;
+
+	pthread_mutex_unlock(&client_exit_mutex);
 }
 
 int main(int argc, char const *argv[]) 
