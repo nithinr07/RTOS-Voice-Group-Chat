@@ -11,14 +11,18 @@
 #include "message.h"
 
 #define PORT 4141
-#define MAX 1000
+#define MAX 10
 
 int server_fd;
 int client_connections[MAX];
+int client_registration[MAX];
+char client_names[MAX][100];
 int client_num;
 
 pthread_t clients[MAX];
+
 pthread_mutex_t client_num_mutex;
+pthread_mutex_t client_registration_mutex;
 pthread_mutex_t client_exit_mutex;
 
 void close_isr(int signum) {
@@ -38,12 +42,28 @@ void close_isr(int signum) {
 
 void *connection_handler(void* clientfd) {
 	int client_fd = *((int *) clientfd);
-	int valread;
+	struct Init init;
+	read(client_fd, &init, sizeof(init));
+	pthread_mutex_lock(&client_registration_mutex);
+	
+	strcpy(client_names[client_num-1], init.name);
+	client_registration[client_num-1] = init.number;
+	
+	pthread_mutex_unlock(&client_registration_mutex);
+	printf("Client Number : %d\n", client_num);
 	struct Message message;
 	while(read(client_fd, &message, sizeof(message))) {
-		for(int i = 0; i < client_num; i++) {
-			if(client_fd != client_connections[i]) {
-				send(client_connections[i], &message, sizeof(message), 0);
+		if(message.msgtype == 0) {
+			for(int i = 0; i < client_num; i++) {
+				if(client_fd != client_connections[i]) {
+					send(client_connections[i], &message, sizeof(message), 0);
+				}
+			}
+		} else if(message.msgtype == 1) {
+			for(int i = 0; i < client_num; i++) {
+				if(message.recipient == client_registration[i]) {
+					send(client_connections[i], &message, sizeof(message), 0);
+				}
 			}
 		}
 	}

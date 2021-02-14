@@ -1,10 +1,12 @@
 #pragma once
 struct Message {
     char name[100];
-    char recipient[100];
+    int msgtype; // 0 for group, 1 for personal
+    int recipient;
     char msg[1000];
 };
 
 struct Init {
-    char recipient[100];
+    char name[100];
+    int number;
 };
