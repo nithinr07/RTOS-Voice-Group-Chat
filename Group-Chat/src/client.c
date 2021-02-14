@@ -33,26 +33,36 @@ void *read_msg() {
 		struct Message message;
 		valread = read(sock, &message, sizeof(message)); 
 		if(valread != 0) {
-			printf("%s : %s\n", message.name, message.msg);
+			fprintf(stdout, "\r%s : %s\n", message.name, message.msg);
+        	fprintf(stdout, "You : ");
+			fflush(stdout);
 		}
 	}
 } 
 
 void *write_msg() {
+	int count = 0;
 	while(1) {
 		struct Message message;
 		strcpy(message.name, name);
 		memset(write_buffer, 0, sizeof(write_buffer));
+		if(count == 0) {
+			fprintf(stdout, "You : ");
+			count = 1;
+		}
 		scanf("%[^\n]%*c", write_buffer);
 		strcpy(message.msg, write_buffer);
 		send(sock, &message, sizeof(message), 0);
 	}
 }
 
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
-	printf("Enter name : ");
-	scanf("%[^\n]%*c", name);
+	strcpy(name, argv[1]);
+	// char ip[32] = "40.121.60.204";
+	char ip[32] = "127.0.0.1";
+	// printf("Enter name : ");
+	// scanf("%[^\n]%*c", name);
 	struct sockaddr_in serv_addr;
 	
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
@@ -64,7 +74,7 @@ int main(int argc, char const *argv[])
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_port = htons(PORT);
 	// Convert IPv4 and IPv6 addresses from text to binary form
-	if(inet_pton(AF_INET, "40.121.60.204", &serv_addr.sin_addr)<=0)
+	if(inet_pton(AF_INET, ip, &serv_addr.sin_addr)<=0)
 	{
 		printf("\nInvalid address/ Address not supported \n");
 		return -1;
