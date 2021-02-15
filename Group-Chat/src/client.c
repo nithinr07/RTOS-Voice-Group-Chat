@@ -52,7 +52,7 @@ void *write_msg() {
 		scanf("%d%*c", &message.msgtype);
 		if(message.msgtype == 1) {
 			printf("Enter Phone Number of recipient : ");
-			scanf("%d%*c", &message.recipient);
+			scanf("%d%*c", &message.recipient_id);
 		}
 		send(sock, &message, sizeof(message), 0);
 	}
@@ -65,8 +65,8 @@ int main(int argc, char *argv[])
 		exit(0);
 	}
 	strcpy(name, argv[1]);
-	// char ip[32] = "40.121.60.204";
-	char ip[32] = "127.0.0.1";
+	char ip[32] = "40.121.60.204";
+	// char ip[32] = "127.0.0.1";
 	struct sockaddr_in serv_addr;
 	
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
@@ -90,8 +90,8 @@ int main(int argc, char *argv[])
 	}
 
 	struct Init init;
-	strcpy(init.name, name);
-	init.number = atoi(argv[2]);
+	// strcpy(init.name, name);
+	init.id = atoi(argv[2]);
 	
 	if(send(sock, &init, sizeof(init), 0) < 0) {
 		printf("User registration failed\n");

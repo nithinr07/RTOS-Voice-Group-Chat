@@ -11,12 +11,12 @@
 #include "message.h"
 
 #define PORT 4141
-#define MAX 10
+#define MAX 1000
 
 int server_fd;
 int client_connections[MAX];
 int client_registration[MAX];
-char client_names[MAX][100];
+// char client_names[MAX][100];
 int client_num;
 
 pthread_t clients[MAX];
@@ -46,8 +46,8 @@ void *connection_handler(void* clientfd) {
 	read(client_fd, &init, sizeof(init));
 	pthread_mutex_lock(&client_registration_mutex);
 	
-	strcpy(client_names[client_num-1], init.name);
-	client_registration[client_num-1] = init.number;
+	// strcpy(client_names[client_num-1], init.name);
+	client_registration[client_num-1] = init.id;
 	
 	pthread_mutex_unlock(&client_registration_mutex);
 	printf("Client Number : %d\n", client_num);
@@ -61,7 +61,7 @@ void *connection_handler(void* clientfd) {
 			}
 		} else if(message.msgtype == 1) {
 			for(int i = 0; i < client_num; i++) {
-				if(message.recipient == client_registration[i]) {
+				if(message.recipient_id == client_registration[i]) {
 					send(client_connections[i], &message, sizeof(message), 0);
 				}
 			}
@@ -98,7 +98,6 @@ int main(int argc, char const *argv[])
 		exit(EXIT_FAILURE); 
 	} 
 	
-	// Forcefully attaching socket to the port 4141 
 	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, 
 											&opt, sizeof(opt))) 
 	{ 
