@@ -41,14 +41,14 @@ void *connection_handler(void* clientfd) {
 	int client_fd = *((int *) clientfd);
 	int valread;
 	while(1) {
-		// struct Message message;
-		uint8_t buf[BUFSIZE];
-		// valread = read(client_fd, &message, sizeof(message));
-		valread = loop_read(client_fd, buf, sizeof(buf)); 
+		struct Message *message = (struct Message *)malloc(sizeof(struct Message));
+		// uint8_t buf[BUFSIZE];
+		valread = read(client_fd, message, sizeof(*message));
+		// valread = loop_read(client_fd, buf, sizeof(buf)); 
 		for(int i = 0; i < client_num; i++) {
 			if(client_fd != client_connections[i]) {
-				// loop_write(client_connections[i], &message, sizeof(message));
-				loop_write(client_connections[i], buf, sizeof(buf));
+				write(client_connections[i], message, sizeof(*message));
+				// loop_write(client_connections[i], buf, sizeof(buf));
 			}
 		}
 	}

@@ -41,20 +41,20 @@ void *read_msg() {
     }
 	for (;;) {
         uint8_t buf[BUFSIZE];
-		// struct Message message;
+		struct Message *message = (struct Message *)malloc(sizeof(struct Message));
         ssize_t r;
         /* Read some data ... */
-        if ((r = read(sock, buf, sizeof(buf))) <= 0) {
+        if ((r = read(sock, message, sizeof(*message))) <= 0) {
             if (r == 0) /* EOF */
                 break;
 
             fprintf(stderr, __FILE__": read() failed: %s\n", strerror(errno));
             goto finish;
         }
-		// memcpy(buf, message.msg, sizeof(buf));
+		// memcpy(buf, message->msg, sizeof(buf));
 		// printf("%s says : \n", message.name);
         /* ... and play it */
-        if (pa_simple_write(s, buf, (size_t) r, &error) < 0) {
+        if (pa_simple_write(s, message->msg, sizeof(message->msg), &error) < 0) {
             fprintf(stderr, __FILE__": pa_simple_write() failed: %s\n", pa_strerror(error));
             goto finish;
         }
@@ -82,17 +82,17 @@ void *write_msg() {
         goto finish;
     }
     for (;;) {
-		// struct Message message;
+		struct Message *message = (struct Message *)malloc(sizeof(struct Message));
         uint8_t buf[BUFSIZE];
         /* Record some data ... */
-        if (pa_simple_read(s, buf, sizeof(buf), &error) < 0) {
+        if (pa_simple_read(s, message->msg, sizeof(message->msg), &error) < 0) {
             fprintf(stderr, __FILE__": pa_simple_read() failed: %s\n", pa_strerror(error));
             goto finish;
         }
-		// memcpy(message.msg, buf, sizeof(buf));
+		// memcpy(message->msg, buf, sizeof(buf));
 		// strcpy(message.name, name);
         /* And write it to STDOUT */
-        if (loop_write(sock, buf, sizeof(buf)) != sizeof(buf)) {
+        if (write(sock, message, sizeof(*message)) != sizeof(*message)) {
             fprintf(stderr, __FILE__": write() failed: %s\n", strerror(errno));
             goto finish;
         }
