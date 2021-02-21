@@ -9,15 +9,17 @@
 #include <pthread.h>
 
 #include "message.h"
+#include "util.h"
 
 #define PORT 4141
-#define MAX 1000
+#define MAX_CONN 1000
+#define BUFSIZE 1024
 
 int server_fd;
-int client_connections[MAX];
+int client_connections[MAX_CONN];
 int client_num;
 
-pthread_t clients[MAX];
+pthread_t clients[MAX_CONN];
 pthread_mutex_t client_num_mutex;
 
 void close_isr(int signum) {
@@ -39,11 +41,14 @@ void *connection_handler(void* clientfd) {
 	int client_fd = *((int *) clientfd);
 	int valread;
 	while(1) {
-		struct Message message;
-		valread = read(client_fd, &message, sizeof(message)); 
+		// struct Message message;
+		uint8_t buf[BUFSIZE];
+		// valread = read(client_fd, &message, sizeof(message));
+		valread = loop_read(client_fd, buf, sizeof(buf)); 
 		for(int i = 0; i < client_num; i++) {
 			if(client_fd != client_connections[i]) {
-				send(client_connections[i], &message, sizeof(message), 0);
+				// loop_write(client_connections[i], &message, sizeof(message));
+				loop_write(client_connections[i], buf, sizeof(buf));
 			}
 		}
 	}

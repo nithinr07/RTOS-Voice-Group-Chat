@@ -9,7 +9,7 @@ LD        = gcc
 CLIENT = client
 SERVER = server
 
-CFLAG = -pthread
+CFLAG = -pthread -lpulse -lpulse-simple
 
 run: $(BIN_DIR)/$(CLIENT) $(BIN_DIR)/$(SERVER)
 
@@ -20,10 +20,10 @@ server: $(BIN_DIR)/$(SERVER)
 						./$(BIN_DIR)/$(SERVER)
 
 $(BIN_DIR)/$(CLIENT): $(BUILD_DIR)/client.o
-						$(LD) $(CFLAG) $(BUILD_DIR)/client.o -o $(BIN_DIR)/$(CLIENT) -I $(INCLUDE_DIR)
+						$(LD) $(BUILD_DIR)/client.o -o $(BIN_DIR)/$(CLIENT) -I $(INCLUDE_DIR) $(CFLAG)
 
 $(BIN_DIR)/$(SERVER): $(BUILD_DIR)/server.o
-						$(LD) $(CFLAG) $(BUILD_DIR)/server.o -o $(BIN_DIR)/$(SERVER) -I $(INCLUDE_DIR)
+						$(LD) $(BUILD_DIR)/server.o -o $(BIN_DIR)/$(SERVER) -I $(INCLUDE_DIR) $(CFLAG)
 
 $(BUILD_DIR)/client.o: $(SRC_DIR)/client.c 
 						$(CC) -c $(SRC_DIR)/client.c -o $(BUILD_DIR)/client.o -I $(INCLUDE_DIR)

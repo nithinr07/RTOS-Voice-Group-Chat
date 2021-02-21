@@ -24,7 +24,7 @@ static ssize_t loop_write(int fd, const void* data, size_t size) {
             break;
 
         ret += r;
-        data = (const uint8_t*) data + r;
+        data = (const struct Message *)data + r;
         size -= (size_t) r;
     }
     return ret;
@@ -43,14 +43,22 @@ static ssize_t loop_read(int fd, void* data, size_t size) {
             break;
 
         ret += r;
-        data = (uint8_t*) data + r;
+        data = (struct Message*)data + r;
         size -= (size_t) r;
     }
     return ret;
 }
 
+int send_data(int fd, const void* data, size_t size) {
+    return loop_write(fd, data, size);
+}
+
+int read_data(int fd, void* data, size_t size) {
+    return loop_read(fd, data, size);
+}
+
 static const pa_sample_spec ss = {
     .format = PA_SAMPLE_S16LE,
     .rate = 44100,
-    .channels = 1
+    .channels = 2
 };
