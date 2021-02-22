@@ -12,6 +12,7 @@
 #include "util.h"
 
 #define PORT 8080
+// #define PORT 4141
 #define BUFSIZE 1024
 
 int sock = 0; int valread;
@@ -90,7 +91,7 @@ void *write_msg() {
             goto finish;
         }
 		// memcpy(message->msg, buf, sizeof(buf));
-		// strcpy(message.name, name);
+		strcpy(message.name, name);
         /* And write it to STDOUT */
         if (write(sock, &message, sizeof(message)) != sizeof(message)) {
             fprintf(stderr, __FILE__": write() failed: %s\n", strerror(errno));
@@ -112,6 +113,7 @@ int main(int argc, char const *argv[])
 	// char *ip = "40.121.60.204";
     // char ip[32] = "127.0.0.1";
     char *ip = "52.149.151.135";
+    // char *ip = "40.70.68.58";
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
 		printf("\n Socket creation error \n");
@@ -134,7 +136,9 @@ int main(int argc, char const *argv[])
 	} else {
 		printf("Connection Established \n");
 	}
-
+    struct Init init;
+    strcpy(init.user_id, name);
+    send(sock, &init, sizeof(init), 0);
 	signal(SIGINT, close_isr);
 
 	pthread_create(&r, NULL, read_msg, NULL);
