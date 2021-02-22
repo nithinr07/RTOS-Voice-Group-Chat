@@ -11,7 +11,7 @@
 #include "message.h"
 #include "util.h"
 
-#define PORT 4141
+#define PORT 8080
 #define BUFSIZE 1024
 
 int sock = 0; int valread;
@@ -110,7 +110,8 @@ int main(int argc, char const *argv[])
 	strcpy(name, argv[1]);
 	struct sockaddr_in serv_addr;
 	// char *ip = "40.121.60.204";
-    char ip[32] = "127.0.0.1";
+    // char ip[32] = "127.0.0.1";
+    char *ip = "52.149.151.135";
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
 		printf("\n Socket creation error \n");

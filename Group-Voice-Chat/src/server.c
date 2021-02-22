@@ -47,6 +47,9 @@ void *connection_handler(void* clientfd) {
 		// valread = loop_read(client_fd, buf, sizeof(buf)); 
 		for(int i = 0; i < client_num; i++) {
 			if(client_fd != client_connections[i]) {
+				printf("Client Connections: %d\n", client_connections[i]);
+				printf("Audio Buffer: %s\n", message.msg);
+				printf("sizeof message %d\n", sizeof(message.msg));
 				write(client_connections[i], &message, sizeof(message));
 				// loop_write(client_connections[i], buf, sizeof(buf));
 			}
