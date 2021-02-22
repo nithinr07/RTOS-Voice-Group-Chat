@@ -40,7 +40,7 @@ void *read_msg() {
         goto finish;
     }
 	for (;;) {
-        uint8_t buf[BUFSIZE];
+        unsigned char buf[BUFSIZE];
 		struct Message message;
         ssize_t r;
         /* Read some data ... */
@@ -83,7 +83,7 @@ void *write_msg() {
     }
     for (;;) {
 		struct Message message;
-        uint8_t buf[BUFSIZE];
+        unsigned char buf[BUFSIZE];
         /* Record some data ... */
         if (pa_simple_read(s, message.msg, sizeof(message.msg), &error) < 0) {
             fprintf(stderr, __FILE__": pa_simple_read() failed: %s\n", pa_strerror(error));
